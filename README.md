@@ -1,18 +1,14 @@
-# Blue One Riyal Coupons
+# Flexible Price Coupons
 
-A free, GPL-licensed WordPress plugin that adds a **Product price = SAR 1** coupon type to WooCommerce. Works with any theme and uses the native coupon editor, eligibility rules and order discounts.
+A free WordPress plugin for WooCommerce. Coupon managers set a **target product price** and **currency** for each coupon: USD 5, EUR 10, GBP 2, or any supported currency and non-negative price.
 
-## Install
+Upload `flexible-price-coupons.zip`, activate it with WooCommerce, then create a coupon under **Marketing → Coupons**. Choose **Target product price**, enter the final unit price in **Coupon amount**, and choose **Target price currency**. See [readme.txt](readme.txt) for complete merchant instructions.
 
-Download `blue-one-riyal-coupons.zip` from [Releases](https://github.com/pmunankarmi/blue-one-riyal-coupons/releases), upload it under **Plugins → Add New Plugin → Upload Plugin**, and activate it with WooCommerce active.
+The selected currency is an eligibility constraint, not an exchange-rate conversion. Checkout must already use that currency. Tax follows the store's price-entry basis; shipping and fees are separate. Lower-priced products are never marked up. Zero is supported. Native restrictions and usage limits are respected, and coupon stacking is blocked.
 
-Create a coupon under **Marketing → Coupons**, choose **Product price = SAR 1**, set any restrictions and publish. No coupon is automatically published. See [readme.txt](readme.txt) for merchant instructions and tax behavior.
-
-The plugin is being prepared for the WordPress.org directory. A GitHub release is not WordPress.org approval or a directory listing.
+If upgrading from Blue One Riyal Coupons, deactivate it first. Existing legacy coupons retain SAR 1 behavior. Edit their discount type to use configurable prices and currencies.
 
 ## Development
-
-Requires PHP 7.4+ and WordPress 6.5+. The current integration verification uses WordPress 7.1.3, WooCommerce 11.2.1, PHP 8.5.7 and the official SQLite integration in a disposable local site. Earlier supported versions and third-party commerce extensions have not been exhaustively tested.
 
 ```sh
 composer install
@@ -21,26 +17,22 @@ composer test
 python3 scripts/build.py
 ```
 
-The build allowlists runtime files and excludes tests, development dependencies and Git metadata. It writes the installable ZIP beside the repository directory.
+The build writes an installable ZIP beside the repository, including only runtime files, the directory readme and GPL license. Tests, dependencies and Git metadata are excluded.
 
-For real WooCommerce tests, use a **disposable** site with administrator email `plugin-test@example.test`. Activate WooCommerce and the plugin, then run:
+Run real WooCommerce tests only on a disposable local WordPress site whose administrator email is `plugin-test@example.test`. They create products, coupons and orders and change store settings:
 
 ```sh
-wp eval-file /absolute/path/to/blue-one-riyal-coupons/tests/integration.php
+wp eval-file /absolute/path/to/flexible-price-coupons/tests/integration.php
 ```
 
-This creates test products, variations, coupons and an order and changes store settings. Never run it against a real store. Use `wp plugin check blue-one-riyal-coupons` with the official Plugin Check plugin on the extracted release ZIP. For runtime checks, preload its CLI file using `--require=/absolute/path/to/wp-content/plugins/plugin-check/cli.php`.
+Use the official Plugin Check against the extracted ZIP. Preload its `cli.php` file for runtime checks:
 
-## Verification for 1.1.0
+```sh
+wp plugin check flexible-price-coupons --require=/absolute/path/to/wp-content/plugins/plugin-check/cli.php
+```
 
-- WordPress Coding Standards 3.4.1: no errors or warnings in distributed PHP.
-- Official Plugin Check (including CLI runtime setup): no findings on the release package.
-- 19 isolated regression checks and 17 real WooCommerce integration assertions passed.
-- Integration coverage: quantities, removal, item limits, exclusions, expiry, exhausted usage, stacking, SAR-only validation, sub-riyal prices, variations, orders and inclusive/exclusive tax.
-- Payment-provider transactions, browser checkout flows, subscriptions, bundles and third-party pricing integrations are not verified.
+Validation environment: WordPress 7.1.3, WooCommerce 11.2.1, PHP 8.5.7, official SQLite integration. Payment transactions, browser checkout, older platform versions and third-party currency/pricing extensions need separate testing. WordPress.org approval is not implied by a public source repository.
 
-## Data and licensing
+## Privacy and license
 
-No tracking, remote services, custom tables or automatically created coupons. Removing the plugin retains WooCommerce coupon and order records. Retire custom coupons before deactivation and keep the plugin active when recalculating orders that use them.
-
-Copyright 2026 pmunankarmi. [GNU GPL version 2 or later](LICENSE.txt).
+No external requests, tracking or advertisements. Coupon currency metadata and historical records are retained on removal. Copyright 2026 pmunankarmi; [GPL version 2 or later](LICENSE.txt).

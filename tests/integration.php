@@ -18,7 +18,8 @@ function blue_riyal_near( $actual, $expected, $label ) {
 function blue_riyal_coupon( $properties = array() ) {
 	$coupon = new WC_Coupon();
 	$coupon->set_code( 'riyal-' . wp_generate_password( 12, false ) );
-	$coupon->set_discount_type( 'blue_one_riyal' );
+	$coupon->set_discount_type( 'fpc_target_price' );
+	$coupon->set_amount( 1 );
 	$coupon->set_props( $properties );
 	$coupon->save();
 	return $coupon;
@@ -132,4 +133,45 @@ blue_riyal_near( WC()->cart->get_cart_contents_total() + WC()->cart->get_cart_co
 WC_Tax::_delete_tax_rate( $rate_id );
 update_option( 'woocommerce_calc_taxes', 'no' );
 update_option( 'woocommerce_prices_include_tax', 'no' );
+// Exercise configurable prices and explicitly bound currencies.
+foreach ( array( 'USD', 'EUR', 'GBP', 'JPY', 'SAR' ) as $currency ) {
+ update_option( 'woocommerce_currency', $currency );
+ foreach ( array( 1, 2, 5, 10, 12.5, 0 ) as $target ) {
+  $flexible = blue_riyal_coupon( array( 'amount' => $target ) );
+  blue_riyal_expect( $flexible->get_meta( '_fpc_currency', true ) === $currency, 'Currency persisted: ' . $currency );
+  blue_riyal_cart( $id, 2 );
+  blue_riyal_expect( WC()->cart->apply_coupon( $flexible->get_code() ), 'Target coupon accepted: ' . $currency . ' ' . $target );
+  WC()->cart->calculate_totals();
+  blue_riyal_near( WC()->cart->get_cart_contents_total(), 2 * $target, 'Configured price applied per unit' );
+ }
+}
+$custom = blue_riyal_coupon( array( 'amount' => 5 ) );
+// Simulate the exact admin-save path, including authorization and nonce.
+$_POST['fpc_currency_nonce'] = wp_create_nonce( 'fpc_save_currency_' . $custom->get_id() );
+$_POST['_fpc_currency'] = 'EUR';
+Flexible_Price_Coupons::save_currency( $custom->get_id(), $custom );
+$custom = new WC_Coupon( $custom->get_id() );
+blue_riyal_expect( 'EUR' === $custom->get_meta( '_fpc_currency', true ), 'Admin selected currency saved' );
+blue_riyal_cart( $id );
+blue_riyal_expect( ! WC()->cart->apply_coupon( $custom->get_code() ), 'EUR coupon rejected at SAR checkout' );
+update_option( 'woocommerce_currency', 'EUR' );
+blue_riyal_expect( WC()->cart->apply_coupon( $custom->get_code() ), 'EUR coupon accepted at EUR checkout' );
+WC()->cart->calculate_totals();
+blue_riyal_near( WC()->cart->get_cart_contents_total(), 5, 'Explicit EUR 5 target applied' );
+$_POST['fpc_currency_nonce'] = 'invalid';
+$_POST['_fpc_currency'] = 'USD';
+Flexible_Price_Coupons::save_currency( $custom->get_id(), $custom );
+blue_riyal_expect( 'EUR' === ( new WC_Coupon( $custom->get_id() ) )->get_meta( '_fpc_currency', true ), 'Invalid nonce cannot change currency' );
+$_POST['fpc_currency_nonce'] = wp_create_nonce( 'fpc_save_currency_' . $custom->get_id() );
+wp_set_current_user( 0 );
+Flexible_Price_Coupons::save_currency( $custom->get_id(), $custom );
+blue_riyal_expect( 'EUR' === ( new WC_Coupon( $custom->get_id() ) )->get_meta( '_fpc_currency', true ), 'Unauthorized user cannot change currency' );
+wp_set_current_user( 1 );
+unset( $_POST['fpc_currency_nonce'], $_POST['_fpc_currency'] );
+update_option( 'woocommerce_currency', 'SAR' );
+$legacy = blue_riyal_coupon( array( 'discount_type' => 'blue_one_riyal', 'amount' => 20 ) );
+blue_riyal_cart( $id );
+WC()->cart->apply_coupon( $legacy->get_code() );
+WC()->cart->calculate_totals();
+blue_riyal_near( WC()->cart->get_cart_contents_total(), 1, 'Legacy coupon remains SAR 1' );
 WP_CLI::success( 'WooCommerce integration checks passed. Disposable site data retained for inspection.' );

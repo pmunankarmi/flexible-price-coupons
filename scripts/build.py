@@ -5,7 +5,7 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 root = Path(__file__).resolve().parents[1]
 target = root.parent / (root.name + '.zip')
-files = [root / name for name in ('blue-one-riyal-coupons.php', 'readme.txt', 'LICENSE.txt')]
+files = [root / name for name in ('flexible-price-coupons.php', 'readme.txt', 'LICENSE.txt')]
 for directory in ('includes', 'assets'):
     files.extend(path for path in (root / directory).rglob('*') if path.is_file())
 with ZipFile(target, 'w', ZIP_DEFLATED) as archive:

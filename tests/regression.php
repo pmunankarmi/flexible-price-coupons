@@ -12,7 +12,10 @@ class WC_Coupon {
  public $amount = 0;
  public $individual = false;
  public function __construct( $type ) { $this->type = $type; }
- public function is_type( $type ) { return $this->type === $type; }
+ public function is_type( $type ) { return in_array( $this->type, (array) $type, true ); }
+ public function get_meta( $key, $single = true ) { return ''; }
+ public function update_meta_data( $key, $value ) {}
+ public function get_amount() { return $this->amount; }
  public function set_amount( $amount ) { $this->amount = $amount; }
  public function set_individual_use( $value ) { $this->individual = $value; }
 }
@@ -27,14 +30,14 @@ class Discount_Context {
  public function __construct( $object = null ) { $this->object = $object; }
  public function get_object() { return $this->object; }
 }
-require __DIR__ . '/../blue-one-riyal-coupons.php';
+require __DIR__ . '/../flexible-price-coupons.php';
 function check( $condition, $label ) {
  if ( ! $condition ) { throw new Exception( 'FAIL: ' . $label ); }
  echo 'PASS: ' . $label . PHP_EOL;
 }
 $currency = 'SAR';
-Blue_One_Riyal_Coupons::boot();
-$special = new WC_Coupon( Blue_One_Riyal_Coupons::TYPE );
+Flexible_Price_Coupons::boot();
+$special = new WC_Coupon( Flexible_Price_Coupons::LEGACY_TYPE );
 $normal = new WC_Coupon( 'percent' );
 $callback = $hooks['woocommerce_coupon_get_discount_amount'];
 check( abs( $callback( 0, 1500, array( 'quantity' => 1 ), true, $special ) - 1499 ) < 0.00001, 'SAR 1500 product leaves SAR 1' );
@@ -46,22 +49,22 @@ foreach ( array( 0, 0.5, 1 ) as $price ) {
  check( 0.0 === $callback( 0, $price, null, true, $special ), 'No price increase or negative discount at ' . $price );
 }
 check( 15 === $callback( 15, 100, null, true, $normal ), 'Other coupon calculation preserved' );
-check( false === Blue_One_Riyal_Coupons::validate( false, $special, new Discount_Context() ), 'Earlier validation rejection preserved' );
-check( true === Blue_One_Riyal_Coupons::validate( true, $special, new Discount_Context() ), 'SAR cart accepted' );
+check( false === Flexible_Price_Coupons::validate( false, $special, new Discount_Context() ), 'Earlier validation rejection preserved' );
+check( true === Flexible_Price_Coupons::validate( true, $special, new Discount_Context() ), 'SAR cart accepted' );
 $currency = 'USD';
 check( 0.0 === $callback( 0, 500, null, true, $special ), 'Non-SAR calculation gives no discount' );
 $rejected = false;
-try { Blue_One_Riyal_Coupons::validate( true, $special, new Discount_Context() ); } catch ( Exception $e ) { $rejected = true; }
+try { Flexible_Price_Coupons::validate( true, $special, new Discount_Context() ); } catch ( Exception $e ) { $rejected = true; }
 check( $rejected, 'Non-SAR cart rejected' );
 $currency = 'SAR';
 $rejected = false;
-try { Blue_One_Riyal_Coupons::validate( true, $special, new Discount_Context( new WC_Order() ) ); } catch ( Exception $e ) { $rejected = true; }
+try { Flexible_Price_Coupons::validate( true, $special, new Discount_Context( new WC_Order() ) ); } catch ( Exception $e ) { $rejected = true; }
 check( $rejected, 'Non-SAR order rejected in SAR store' );
-check( false === Blue_One_Riyal_Coupons::allow_stacking( true, $normal, $special, array() ), 'Later coupon cannot stack' );
-check( array() === Blue_One_Riyal_Coupons::keep_coupons( array( 'old' ), $special, array( 'old' ) ), 'Existing coupons removed for individual use' );
-check( true === Blue_One_Riyal_Coupons::allow_stacking( true, $normal, $normal, array() ), 'Other stacking rules preserved' );
-Blue_One_Riyal_Coupons::normalize( $special );
+check( false === Flexible_Price_Coupons::allow_stacking( true, $normal, $special, array() ), 'Later coupon cannot stack' );
+check( array() === Flexible_Price_Coupons::keep_coupons( array( 'old' ), $special, array( 'old' ) ), 'Existing coupons removed for individual use' );
+check( true === Flexible_Price_Coupons::allow_stacking( true, $normal, $normal, array() ), 'Other stacking rules preserved' );
+Flexible_Price_Coupons::normalize( $special );
 check( 1 === $special->amount && true === $special->individual, 'Saved special coupon has fixed amount and individual use' );
-Blue_One_Riyal_Coupons::normalize( $normal );
+Flexible_Price_Coupons::normalize( $normal );
 check( 0 === $normal->amount && false === $normal->individual, 'Normal coupon not changed on save' );
 echo "All isolated regression checks passed. See integration.php for the real WooCommerce suite.\n";

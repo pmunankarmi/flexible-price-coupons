@@ -8,11 +8,16 @@
 
 	$( function () {
 		function updateFields() {
-			var active = $( '#discount_type' ).val() === 'blue_one_riyal';
-			$( '.blue-one-riyal-help' ).prop( 'hidden', ! active );
-			$( '#coupon_amount' ).prop( 'readonly', active );
+			var type = $( '#discount_type' ).val();
+			var legacy = type === 'blue_one_riyal';
+			var active = legacy || type === 'fpc_target_price';
+			$( '.fpc-currency-field' ).toggle( active && ! legacy );
+			$( '.fpc-target-price-help' ).prop( 'hidden', ! active );
+			$( '#coupon_amount' ).prop( 'readonly', legacy );
 			if ( active ) {
-				$( '#coupon_amount' ).val( '1' );
+				if ( legacy ) {
+					$( '#coupon_amount' ).val( '1' );
+				}
 				$( '#individual_use' ).prop( 'checked', true );
 				$( '.limit_usage_to_x_items_field' ).show();
 			}

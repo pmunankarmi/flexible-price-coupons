@@ -1,96 +1,102 @@
-=== Blue One Riyal Coupons ===
+=== Flexible Price Coupons ===
 Contributors: pmunankarmi
-Tags: coupons, discounts, woocommerce, sar, pricing
+Tags: coupons, discounts, woocommerce, pricing, currency
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create coupons that reduce eligible WooCommerce products to SAR 1 each, with native product restrictions, expiry dates and usage limits.
+Create WooCommerce coupons with an admin-defined target product price and currency, using native product restrictions and usage limits.
 
 == Description ==
 
-Blue One Riyal Coupons adds a "Product price = SAR 1" discount type to the WooCommerce coupon editor. Store owners choose their own coupon codes and publish them using the normal coupon workflow.
+Flexible Price Coupons lets store administrators and authorized coupon managers choose the final price of each eligible product unit and the currency for each coupon.
 
-* Discount each eligible unit to one Saudi riyal.
-* Use the same coupon with simple products and product variations.
-* Apply to all products, or restrict by product or category.
-* Keep WooCommerce's expiry, email restrictions and usage limits.
-* Limit the number of discounted items using the native item-limit field.
-* Prevent combining this coupon with other coupons.
-* Keep catalog prices unchanged: the reduction is recorded as a coupon discount.
+Select the "Target product price" discount type, enter a price such as 1, 2, 5, 10 or 12.50 in Coupon amount, and choose a Target price currency. For example, a USD 5 coupon reduces a USD 100 product to USD 5. The amount is the target price, not the amount subtracted.
 
-The plugin requires WooCommerce and Saudi riyals (SAR) as the transaction currency. Installation does not automatically create or publish a coupon. It works independently of your theme.
+* Set any non-negative target price per coupon, including zero for free eligible products.
+* Choose from the currencies supported by WooCommerce.
+* Apply only when the active checkout currency matches the coupon currency.
+* Support simple products and variations without changing catalog prices.
+* Use native product/category restrictions, expiry dates, email restrictions and usage limits.
+* Limit the number of discounted units using the native item-limit field.
+* Prevent coupon stacking and never increase prices already below the target.
 
-= Prices, tax and shipping =
+Works independently of your theme. WooCommerce is required. No coupons are created or published automatically.
 
-The target price follows WooCommerce's price-entry tax basis. If prices are entered excluding tax, applicable tax is added to SAR 1. If prices are entered including tax, WooCommerce calculates the included tax. Customer tax exemptions, location adjustments and rounding follow WooCommerce rules. Shipping and fees are separate: this does not make an entire order cost SAR 1.
+= Currency behavior =
 
-Two discounted units cost SAR 2 on that tax basis. Products already priced below SAR 1 keep their lower price. Applying this coupon removes other coupons using WooCommerce's individual-use behavior.
+The chosen currency is saved with the coupon. Changing the store currency does not change saved coupon currencies. A USD 5 coupon is rejected at an EUR checkout; it does not become EUR 5. The plugin does not switch storefront currency or perform exchange-rate conversion. A store must already support checkout in the selected currency. Third-party multi-currency extensions require compatibility testing. Order recalculation requires the order currency, active WooCommerce currency and coupon currency to match.
+
+= Tax, shipping and quantities =
+
+The target uses the store's price-entry tax basis. If prices are entered excluding tax, applicable tax is added to the target. For tax-inclusive prices, WooCommerce calculates the included tax. Exemptions, location adjustments and currency rounding follow WooCommerce settings. Shipping and fees remain separate.
+
+A target of 5 with two eligible units leaves a product total of 10 on that tax basis. Products below the target retain their lower price. Applying a target-price coupon removes other coupons using individual-use behavior.
 
 = Privacy and external services =
 
-This plugin makes no external service requests, contains no tracking, and adds no separate customer database. Coupon and order data remain in WooCommerce. It loads a small local script only in the coupon editor.
-
-= Compatibility =
-
-Designed for standard WooCommerce simple products and variations. Third-party subscriptions, bundles, dynamic pricing and multi-currency extensions require separate testing. Other extensions can alter prices, coupon filters or taxes. Test your store's checkout configuration before running a promotion.
+No external service requests, tracking, advertising or separate customer database. Coupon currency is stored in WooCommerce coupon metadata. A local editor script loads only on coupon editing screens. WooCommerce retains coupon and order data.
 
 == Installation ==
 
-1. Install and activate WooCommerce. Set the store currency to Saudi riyals (SAR).
-2. Upload the plugin ZIP using Plugins > Add New Plugin > Upload Plugin, and activate it.
-3. Enable coupons in WooCommerce > Settings > General if needed.
-4. Open Marketing > Coupons > Add coupon and enter a code such as ONESR.
-5. Select "Product price = SAR 1" as the discount type. The amount is fixed at 1.
-6. Leave product and category restrictions empty for all products. Leave "Exclude sale items" unchecked to include sale products.
-7. Set any desired expiry date, email restrictions and usage limits, then publish.
-8. Apply the code in the cart or checkout.
+1. Install and activate WooCommerce.
+2. Upload flexible-price-coupons.zip through Plugins > Add New Plugin > Upload Plugin and activate it.
+3. Enable coupons under WooCommerce > Settings > General if necessary.
+4. Open Marketing > Coupons > Add coupon and enter your chosen code.
+5. Choose "Target product price" as the discount type.
+6. Enter the final unit price in Coupon amount, then select Target price currency.
+7. Set product restrictions and usage limits if desired, then publish.
+8. Apply the coupon at a checkout using the same currency.
 
 == Frequently Asked Questions ==
 
-= Does this work without WooCommerce? =
+= Can I set prices such as 1, 2, 5 or 10? =
 
-No. WooCommerce provides the cart, products, checkout and coupon management.
+Yes. Enter any non-negative amount using WooCommerce's normal price field. Decimal prices are rounded according to the store's currency precision. Zero makes eligible product units free; shipping and fees may still apply.
 
-= Can I choose my own coupon code? =
+= Who can change the price and currency? =
 
-Yes. Create any available coupon code using WooCommerce's native coupon editor.
+Administrators and users authorized to edit the coupon, such as shop managers. The native WooCommerce form handles price permissions. Currency changes require coupon-edit permission, a verified nonce and a supported currency code.
 
-= Does it discount every product in the cart? =
+= Does choosing USD convert my store to USD? =
 
-Every eligible unit is discounted unless you set an item limit. Product/category restrictions and sale exclusions are respected. Set "Limit usage to X items" to 1 for one discounted unit per cart. WooCommerce selects eligible items in its own discount order; this is not a customer-selected item picker.
+No. Currency selection controls where the coupon is eligible. It does not add currency switching or conversion to the store.
 
-= Is the final order total exactly SAR 1? =
+= Does it apply to every product? =
 
-No. The target is per eligible product unit, on your store's tax-entry basis. Shipping, fees, taxes and other cart items can increase the order total.
+Leave product/category restrictions empty to allow all eligible products. Set "Limit usage to X items" to limit discounted units. WooCommerce determines the order in which eligible items are discounted.
 
-= Does the coupon work in other currencies? =
+= What happens to coupons from Blue One Riyal Coupons? =
 
-No. It is specifically for SAR transactions. Currency conversion integrations are not supported automatically.
+Deactivate the old plugin before activating this one. Existing legacy coupons continue to target SAR 1 and remain restricted to SAR. To use a different price or currency, edit the coupon and select "Target product price". Do not run both plugins together.
 
-= What happens when I deactivate or delete the plugin? =
+= What happens when I remove the plugin? =
 
-The custom discount calculation stops. Existing coupons and historical orders are retained. Retire these coupons before deactivating. Keep the plugin active when recalculating orders that use this custom coupon type.
+The custom calculation stops. Existing coupons, currency metadata and historical orders remain. Retire these coupons before deactivation and keep the plugin active when recalculating orders that use its discount types.
 
-= Does this plugin send data to external services? =
+= Are bundles, subscriptions and currency-switcher plugins supported? =
 
-No. It makes no external requests and includes no analytics or advertising.
+They require separate compatibility checks. Standard simple products and variations use native WooCommerce discount calculations. Test your store's checkout and extensions before running a promotion.
 
 == Changelog ==
 
+= 1.2.0 =
+* Rename the plugin to Flexible Price Coupons.
+* Add configurable target prices and per-coupon currency selection.
+* Validate currency saving with permissions, nonce verification and an allowlist.
+* Preserve existing SAR 1 coupons using a legacy discount type.
+
 = 1.1.0 =
-* Prepare the first public distribution with directory metadata and documentation.
-* Load editor assets through the WordPress enqueue API on coupon screens only.
-* Preserve the coupon type identifier for coupons created with version 1.0.0.
+* Add WordPress directory metadata and scoped editor assets.
 
 = 1.0.0 =
-* Initial SAR 1 coupon implementation.
+* Initial limited-currency coupon implementation.
 
 == Upgrade Notice ==
 
-= 1.1.0 =
-Public distribution preparation. Existing one-riyal coupons retain their discount type and behavior.
+= 1.2.0 =
+Deactivate Blue One Riyal Coupons before installing Flexible Price Coupons. Legacy coupons retain SAR 1 behavior until you change their discount type.
