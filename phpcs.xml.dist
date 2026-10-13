@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ruleset name="Blue One Riyal Coupons">
+    <description>WordPress Coding Standards for distributed PHP.</description>
+    <file>blue-one-riyal-coupons.php</file>
+    <file>includes</file>
+    <arg name="extensions" value="php"/>
+    <rule ref="WordPress"/>
+    <config name="minimum_wp_version" value="6.5"/>
+</ruleset>

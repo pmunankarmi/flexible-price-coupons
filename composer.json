@@ -1,0 +1,9 @@
+{
+  "name": "pmunankarmi/blue-one-riyal-coupons",
+  "description": "WooCommerce coupons that reduce eligible products to one Saudi riyal each.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require-dev": {"wp-coding-standards/wpcs": "^3.4"},
+  "config": {"allow-plugins": {"dealerdirect/phpcodesniffer-composer-installer": true}},
+  "scripts": {"lint": "phpcs", "test": "php tests/regression.php"}
+}
